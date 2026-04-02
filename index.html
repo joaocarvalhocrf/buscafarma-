@@ -161,11 +161,11 @@ function render(lista){
 
     const link = document.createElement("a");
     link.className = "btn";
-    link.href = p.whatsapp;
-    link.target = "_blank";
-    link.href = `${p.whatsapp}?text=Olá, vi o produto ${p.nome} no BuscaFarma!`;
-    card.appendChild(document.createElement("br"));
-    card.appendChild(link);
+    const link = document.createElement("a");
+link.className = "btn";
+link.target = "_blank";
+link.textContent = "Chamar no WhatsApp";
+link.href = `${p.whatsapp}?text=Olá, vi o produto ${p.nome} no BuscaFarma!`;
 
     fragment.appendChild(card);
   });
