@@ -164,17 +164,17 @@ function render(lista){
     card.appendChild(farmacia);
 
     if(index === 0){
-      const destaque = document.createElement("strong");
-      destaque.textContent = "🔥 Mais barato";
-      card.appendChild(destaque);
+  const badge = document.createElement("div");
+  badge.className = "badge";
+  badge.textContent = "🔥 Melhor preço";
+  card.appendChild(badge);
     }
 
     const link = document.createElement("a");
     link.className = "btn";
     link.href = p.whatsapp;
     link.target = "_blank";
-    link.textContent = "Chamar no WhatsApp";
-
+    link.href = `${p.whatsapp}?text=Olá, vi o produto ${p.nome} no BuscaFarma!`;
     card.appendChild(document.createElement("br"));
     card.appendChild(link);
 
