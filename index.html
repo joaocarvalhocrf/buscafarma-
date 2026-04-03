@@ -191,6 +191,9 @@ function buscar(){
     resultados.appendChild(card);
   });
 }
+  if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+  }
 </script>
 
 </body>
