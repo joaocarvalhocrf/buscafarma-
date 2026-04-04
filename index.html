@@ -86,6 +86,7 @@ header {
   margin-bottom: 12px;
   display: flex;
   gap: 10px;
+  cursor: pointer;
 }
 
 .card img {
@@ -178,6 +179,45 @@ function buscar(){
     const card = document.createElement("div");
     card.className = "card";
 
+    card.addEventListener("click", () => {
+      abrirProduto(p.nome);
+    });
+
+    card.innerHTML = `
+      <img src="${p.img}" onerror="this.src='https://via.placeholder.com/80'">
+      <div class="info">
+        <h4>${p.nome}</h4>
+        <p class="price">R$ ${p.preco.toFixed(2)}</p>
+        <p>${p.farmacia}</p>
+        ${index === 0 ? '<span class="badge">🔥 Melhor preço</span>' : ''}
+        <a class="btn" target="_blank" rel="noopener noreferrer"
+           onclick="event.stopPropagation()"
+           href="${p.whatsapp}?text=Olá, vi ${p.nome} no BuscaFarma">
+           Comprar
+        </a>
+      </div>
+    `;
+
+    fragment.appendChild(card);
+  });
+
+  resultados.innerHTML = "";
+  resultados.appendChild(fragment);
+}
+
+function abrirProduto(nomeProduto){
+  const resultados = document.getElementById("resultados");
+
+  const lista = produtos
+    .filter(p => p.nome === nomeProduto)
+    .sort((a, b) => a.preco - b.preco);
+
+  const fragment = document.createDocumentFragment();
+
+  lista.forEach((p, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
     card.innerHTML = `
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/80'">
       <div class="info">
@@ -195,7 +235,11 @@ function buscar(){
     fragment.appendChild(card);
   });
 
-  resultados.innerHTML = "";
+  resultados.innerHTML = `
+    <button onclick="buscar()" style="margin-bottom:10px;">⬅ Voltar</button>
+    <h3>Comparando preços</h3>
+  `;
+
   resultados.appendChild(fragment);
 }
 
