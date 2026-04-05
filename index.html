@@ -69,7 +69,6 @@ header {
   height: 40px;
 }
 
-/* CARDS */
 .card {
   background: white;
   border-radius: 14px;
@@ -107,8 +106,14 @@ header {
   display: inline-block;
 }
 
-.badge-patrocinado {
-  background: linear-gradient(90deg, #f1c40f, #f39c12);
+.patrocinado {
+  background: #f1c40f;
+  color: black;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
 }
 
 .btn {
@@ -120,26 +125,13 @@ header {
   font-size: 13px;
 }
 
-/* 📊 PAINEL */
 .painel {
-  background: white;
+  background: #111;
+  color: #0f0;
   padding: 10px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-}
-
-.painel h3 {
-  margin: 0 0 10px 0;
-}
-
-.painel button {
-  background: red;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 6px;
-  margin-top: 10px;
+  font-size: 12px;
+  margin: 10px;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -157,13 +149,6 @@ header {
 
 <div class="container">
 
-  <!-- 📊 PAINEL -->
-  <div class="painel">
-    <h3>📊 Cliques por farmácia</h3>
-    <div id="painelCliques"></div>
-    <button onclick="zerarCliques()">Zerar dados</button>
-  </div>
-
   <div class="search-box">
     <input type="text" id="search" placeholder="Digite o nome do remédio...">
     <button id="btnBuscar">🔍</button>
@@ -173,53 +158,44 @@ header {
 
 </div>
 
+<!-- 🔒 PAINEL ADMIN -->
+<div class="painel" id="painelAdmin" style="display:none;">
+  <strong>📊 Painel Admin</strong><br>
+  <div id="cliques"></div>
+</div>
+
 <script>
 const produtos = [
 
-  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg"},
-  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg", patrocinado:true},
+  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg", patrocinado:true},
+  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg"},
   {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona.jpg"},
 
   {nome:"Dorflex", preco:12.99, farmacia:"Farmácia Central", img:"dorflex.jpg"},
-  {nome:"Dorflex", preco:11.50, farmacia:"Drogaria Saúde", img:"dorflex.jpg"},
+  {nome:"Dorflex", preco:11.50, farmacia:"Drogaria Saúde", img:"dorflex.jpg", patrocinado:true},
   {nome:"Dorflex", preco:13.20, farmacia:"Farmácia Popular", img:"dorflex.jpg"},
 
   {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpg"},
-  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpg", patrocinado:true},
+  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpg"},
   {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpg"}
 ];
 
-// 🔥 REGISTRAR CLIQUE
-function registrarClique(farmacia){
-  let dados = JSON.parse(localStorage.getItem("cliques")) || {};
+// 📊 CONTADOR
+let cliques = JSON.parse(localStorage.getItem("cliques")) || {};
 
-  if(!dados[farmacia]){
-    dados[farmacia] = 0;
-  }
-
-  dados[farmacia]++;
-
-  localStorage.setItem("cliques", JSON.stringify(dados));
-
+function registrarClique(produto){
+  cliques[produto] = (cliques[produto] || 0) + 1;
+  localStorage.setItem("cliques", JSON.stringify(cliques));
   atualizarPainel();
 }
 
-// 📊 ATUALIZA PAINEL
 function atualizarPainel(){
-  const painel = document.getElementById("painelCliques");
-  const dados = JSON.parse(localStorage.getItem("cliques")) || {};
+  const div = document.getElementById("cliques");
+  div.innerHTML = "";
 
-  painel.innerHTML = "";
-
-  for(let farm in dados){
-    painel.innerHTML += `<p>${farm}: <strong>${dados[farm]} cliques</strong></p>`;
+  for(let p in cliques){
+    div.innerHTML += `${p}: ${cliques[p]} cliques<br>`;
   }
-}
-
-// 🗑️ ZERAR
-function zerarCliques(){
-  localStorage.removeItem("cliques");
-  atualizarPainel();
 }
 
 // 🔍 BUSCA
@@ -227,15 +203,9 @@ function buscar(){
   const termo = document.getElementById("search").value.toLowerCase();
   const resultados = document.getElementById("resultados");
 
-  let filtrados = produtos.filter(p => p.nome.toLowerCase().includes(termo));
-
-  const menorPreco = Math.min(...filtrados.map(p => p.preco));
-
-  filtrados.sort((a, b) => {
-    if (a.patrocinado && !b.patrocinado) return -1;
-    if (!a.patrocinado && b.patrocinado) return 1;
-    return a.preco - b.preco;
-  });
+  const filtrados = produtos
+    .filter(p => p.nome.toLowerCase().includes(termo))
+    .sort((a,b) => a.preco - b.preco);
 
   resultados.innerHTML = "";
 
@@ -248,26 +218,21 @@ function buscar(){
     return;
   }
 
-  filtrados.forEach((p) => {
+  filtrados.forEach((p, index) => {
     const card = document.createElement("div");
     card.className = "card";
-
-    const isMelhorPreco = p.preco === menorPreco;
 
     card.innerHTML = `
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
       <div class="info">
-        <strong>${p.nome}</strong>
-
-        ${p.patrocinado ? '<div class="badge badge-patrocinado">⭐ Patrocinado</div>' : ''}
-        ${isMelhorPreco ? '<div class="badge">🔥 Melhor preço</div>' : ''}
-
+        <strong>${p.nome}</strong><br>
+        ${p.patrocinado ? '<div class="patrocinado">⭐ Patrocinado</div>' : ''}
+        ${!p.patrocinado && index === 0 ? '<div class="badge">🔥 Melhor preço</div>' : ''}
         <div class="price">R$ ${p.preco.toFixed(2)}</div>
         <small>${p.farmacia}</small>
       </div>
-
       <a class="btn" target="_blank"
-        onclick="registrarClique('${p.farmacia}')"
+        onclick="registrarClique('${p.nome}')"
         href="https://wa.me/?text=Olá, quero ${p.nome}">
         Comprar
       </a>
@@ -277,12 +242,18 @@ function buscar(){
   });
 }
 
+// 🔒 MODO ADMIN
+if (window.location.search.includes("admin")) {
+  document.getElementById("painelAdmin").style.display = "block";
+  atualizarPainel();
+}
+
+// eventos
 document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
-// iniciar
+// carregar inicial
 buscar();
-atualizarPainel();
 </script>
 
 </body>
