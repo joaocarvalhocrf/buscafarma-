@@ -69,6 +69,7 @@ header {
   height: 40px;
 }
 
+/* CARDS */
 .card {
   background: white;
   border-radius: 14px;
@@ -118,6 +119,28 @@ header {
   text-decoration: none;
   font-size: 13px;
 }
+
+/* 📊 PAINEL */
+.painel {
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.painel h3 {
+  margin: 0 0 10px 0;
+}
+
+.painel button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
 </style>
 </head>
 
@@ -134,6 +157,13 @@ header {
 
 <div class="container">
 
+  <!-- 📊 PAINEL -->
+  <div class="painel">
+    <h3>📊 Cliques por farmácia</h3>
+    <div id="painelCliques"></div>
+    <button onclick="zerarCliques()">Zerar dados</button>
+  </div>
+
   <div class="search-box">
     <input type="text" id="search" placeholder="Digite o nome do remédio...">
     <button id="btnBuscar">🔍</button>
@@ -146,33 +176,61 @@ header {
 <script>
 const produtos = [
 
-  // DIPIRONA
-  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
-  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg", patrocinado:true},
-  {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
+  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg"},
+  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg", patrocinado:true},
+  {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona.jpg"},
 
-  // DORFLEX
   {nome:"Dorflex", preco:12.99, farmacia:"Farmácia Central", img:"dorflex.jpg"},
   {nome:"Dorflex", preco:11.50, farmacia:"Drogaria Saúde", img:"dorflex.jpg"},
   {nome:"Dorflex", preco:13.20, farmacia:"Farmácia Popular", img:"dorflex.jpg"},
 
-  // PARACETAMOL
-  {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpeg"},
-  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpeg", patrocinado:true},
-  {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpeg"}
+  {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpg"},
+  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpg", patrocinado:true},
+  {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpg"}
 ];
 
+// 🔥 REGISTRAR CLIQUE
+function registrarClique(farmacia){
+  let dados = JSON.parse(localStorage.getItem("cliques")) || {};
+
+  if(!dados[farmacia]){
+    dados[farmacia] = 0;
+  }
+
+  dados[farmacia]++;
+
+  localStorage.setItem("cliques", JSON.stringify(dados));
+
+  atualizarPainel();
+}
+
+// 📊 ATUALIZA PAINEL
+function atualizarPainel(){
+  const painel = document.getElementById("painelCliques");
+  const dados = JSON.parse(localStorage.getItem("cliques")) || {};
+
+  painel.innerHTML = "";
+
+  for(let farm in dados){
+    painel.innerHTML += `<p>${farm}: <strong>${dados[farm]} cliques</strong></p>`;
+  }
+}
+
+// 🗑️ ZERAR
+function zerarCliques(){
+  localStorage.removeItem("cliques");
+  atualizarPainel();
+}
+
+// 🔍 BUSCA
 function buscar(){
   const termo = document.getElementById("search").value.toLowerCase();
   const resultados = document.getElementById("resultados");
 
-  let filtrados = produtos
-    .filter(p => p.nome.toLowerCase().includes(termo));
+  let filtrados = produtos.filter(p => p.nome.toLowerCase().includes(termo));
 
-  // 🔥 descobre o menor preço geral
   const menorPreco = Math.min(...filtrados.map(p => p.preco));
 
-  // ⭐ ordenação: patrocinado primeiro, depois preço
   filtrados.sort((a, b) => {
     if (a.patrocinado && !b.patrocinado) return -1;
     if (!a.patrocinado && b.patrocinado) return 1;
@@ -209,6 +267,7 @@ function buscar(){
       </div>
 
       <a class="btn" target="_blank"
+        onclick="registrarClique('${p.farmacia}')"
         href="https://wa.me/?text=Olá, quero ${p.nome}">
         Comprar
       </a>
@@ -221,7 +280,9 @@ function buscar(){
 document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
+// iniciar
 buscar();
+atualizarPainel();
 </script>
 
 </body>
