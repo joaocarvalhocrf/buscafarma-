@@ -98,10 +98,10 @@ header {
 }
 
 .badge {
-  background: #27ae60;
+  background: #ff4757;
   color: white;
-  padding: 3px 6px;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
   font-size: 11px;
   margin-left: 5px;
 }
@@ -176,7 +176,7 @@ function buscar(){
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
       <div class="info">
         <strong>${p.nome}</strong>
-        ${index === 0 ? '<span class="badge">🔥 Mais barato</span>' : ''}
+        ${index === 0 ? '<span class="badge">🔥 MELHOR PREÇO</span>' : ''}
         <div class="price">R$ ${p.preco.toFixed(2)}</div>
         <small>${p.farmacia}</small>
       </div>
