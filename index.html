@@ -67,15 +67,8 @@ header {
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  transition: transform 0.1s;
 }
 
-/* 🔥 efeito de clique */
-.search-box button:active {
-  transform: scale(0.9);
-}
-
-/* RESULTADOS */
 .card {
   background: white;
   border-radius: 14px;
@@ -113,6 +106,10 @@ header {
   display: inline-block;
 }
 
+.badge-patrocinado {
+  background: linear-gradient(90deg, #f1c40f, #f39c12);
+}
+
 .btn {
   background: #2ecc71;
   color: white;
@@ -120,12 +117,6 @@ header {
   border-radius: 8px;
   text-decoration: none;
   font-size: 13px;
-  transition: transform 0.1s;
-}
-
-/* 🔥 efeito botão comprar */
-.btn:active {
-  transform: scale(0.95);
 }
 </style>
 </head>
@@ -156,9 +147,9 @@ header {
 const produtos = [
 
   // DIPIRONA
-  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
-  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
-  {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
+  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg"},
+  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg", patrocinado:true},
+  {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona.jpg"},
 
   // DORFLEX
   {nome:"Dorflex", preco:12.99, farmacia:"Farmácia Central", img:"dorflex.jpg"},
@@ -166,22 +157,27 @@ const produtos = [
   {nome:"Dorflex", preco:13.20, farmacia:"Farmácia Popular", img:"dorflex.jpg"},
 
   // PARACETAMOL
-  {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpeg"},
-  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpeg"},
-  {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpeg"}
+  {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpg"},
+  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpg", patrocinado:true},
+  {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpg"}
 ];
 
 function buscar(){
   const termo = document.getElementById("search").value.toLowerCase();
   const resultados = document.getElementById("resultados");
 
-  const filtrados = produtos
-    .filter(p => p.nome.toLowerCase().includes(termo))
-    .sort((a,b) => a.preco - b.preco);
+  let filtrados = produtos
+    .filter(p => p.nome.toLowerCase().includes(termo));
+
+  // 🔥 PRIORIDADE: patrocinado primeiro, depois preço
+  filtrados.sort((a, b) => {
+    if (a.patrocinado && !b.patrocinado) return -1;
+    if (!a.patrocinado && b.patrocinado) return 1;
+    return a.preco - b.preco;
+  });
 
   resultados.innerHTML = "";
 
-  // 🔥 mensagem quando não encontra
   if(filtrados.length === 0){
     resultados.innerHTML = `
       <p style="text-align:center;color:gray;margin-top:20px;">
@@ -199,10 +195,14 @@ function buscar(){
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
       <div class="info">
         <strong>${p.nome}</strong>
-${index === 0 ? '<div class="badge">🔥 Melhor preço</div>' : ''}
+
+        ${p.patrocinado ? '<div class="badge badge-patrocinado">⭐ Patrocinado</div>' : ''}
+        ${index === 0 && !p.patrocinado ? '<div class="badge">🔥 Melhor preço</div>' : ''}
+
         <div class="price">R$ ${p.preco.toFixed(2)}</div>
         <small>${p.farmacia}</small>
       </div>
+
       <a class="btn" target="_blank"
         href="https://wa.me/?text=Olá, quero ${p.nome}">
         Comprar
@@ -216,7 +216,6 @@ ${index === 0 ? '<div class="badge">🔥 Melhor preço</div>' : ''}
 document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
-// 🔥 carrega automático ao abrir
 buscar();
 </script>
 
