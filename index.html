@@ -108,8 +108,9 @@ header {
   color: white;
   padding: 4px 8px;
   border-radius: 8px;
-  font-size: 11px;
-  margin-left: 5px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
 }
 
 .btn {
@@ -198,7 +199,7 @@ function buscar(){
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
       <div class="info">
         <strong>${p.nome}</strong>
-        ${index === 0 ? '<span class="badge">🔥 MELHOR PREÇO</span>' : ''}
+${index === 0 ? '<div class="badge">🔥 Melhor preço</div>' : ''}
         <div class="price">R$ ${p.preco.toFixed(2)}</div>
         <small>${p.farmacia}</small>
       </div>
