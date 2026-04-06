@@ -140,6 +140,17 @@ header {
   margin: 10px;
   border-radius: 10px;
 }
+
+/* 🔥 botão zerar */
+.btn-reset {
+  margin-top: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -148,7 +159,6 @@ header {
 <header>
   <div class="logo">BuscaFarma</div>
 
-  <!-- 🔥 BOTÃO ANUNCIAR OTIMIZADO -->
   <a class="btn-anunciar" target="_blank"
      href="https://wa.me/5522981495667?text=Olá,%20tenho%20uma%20farmácia%20e%20quero%20anunciar%20no%20BuscaFarma.%20Pode%20me%20explicar%20como%20funciona%20e%20os%20valores?">
      Anunciar
@@ -170,9 +180,14 @@ header {
 
 </div>
 
+<!-- 🔥 PAINEL ADMIN -->
 <div class="painel" id="painelAdmin" style="display:none;">
   <strong>📊 Painel Admin</strong><br>
   <div id="cliques"></div>
+
+  <button class="btn-reset" onclick="resetarCliques()">
+    🗑️ Zerar cliques
+  </button>
 </div>
 
 <script>
@@ -202,8 +217,20 @@ function registrarClique(produto){
 function atualizarPainel(){
   const div = document.getElementById("cliques");
   div.innerHTML = "";
+
   for(let p in cliques){
     div.innerHTML += `${p}: ${cliques[p]} cliques<br>`;
+  }
+}
+
+/* 🔥 NOVO: resetar cliques */
+function resetarCliques(){
+  const confirmar = confirm("Tem certeza que deseja apagar todos os cliques?");
+  
+  if(confirmar){
+    cliques = {};
+    localStorage.removeItem("cliques");
+    atualizarPainel();
   }
 }
 
@@ -253,6 +280,7 @@ function buscar(){
   });
 }
 
+/* 🔥 ATIVAR ADMIN */
 if (window.location.search.includes("admin")) {
   document.getElementById("painelAdmin").style.display = "block";
   atualizarPainel();
