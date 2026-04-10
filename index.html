@@ -142,13 +142,12 @@ header {
 }
 
 .btn-reset {
-  margin-top: 10px;
   background: red;
   color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
-  cursor: pointer;
+  margin-top: 5px;
 }
 </style>
 </head>
@@ -180,17 +179,31 @@ header {
 </div>
 
 <div class="painel" id="painelAdmin" style="display:none;">
-  <strong>📊 Cliques por Farmácia</strong><br>
+  <strong>📊 Painel Admin</strong><br>
   <div id="cliques"></div>
-
-  <button class="btn-reset" onclick="resetarCliques()">
-    🗑️ Zerar cliques
-  </button>
+  <button class="btn-reset" onclick="zerarCliques()">Zerar cliques</button>
 </div>
 
-<script>
-const produtos = [
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
 
+<script>
+// 🔥 COLE AQUI SUA CONFIG DO FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDK31lrk1SaWE-muumhYJIJ2mBRvq_T8EA",
+  authDomain: "buscafarma-a4c3c.firebaseapp.com",
+  projectId: "buscafarma-a4c3c",
+  storageBucket: "buscafarma-a4c3c.firebasestorage.app",
+  messagingSenderId: "457560066459",
+  appId: "1:457560066459:web:4389b9fe057c7362a5f93e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// PRODUTOS
+const produtos = [
   {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg", patrocinado:true},
   {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg"},
   {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona.jpg"},
@@ -204,33 +217,48 @@ const produtos = [
   {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpg"}
 ];
 
-let cliques = JSON.parse(localStorage.getItem("cliquesFarmacia")) || {};
-
-/* 🔥 AGORA CONTA POR FARMÁCIA */
+// 🔥 REGISTRAR CLIQUE GLOBAL
 function registrarClique(farmacia){
-  cliques[farmacia] = (cliques[farmacia] || 0) + 1;
-  localStorage.setItem("cliquesFarmacia", JSON.stringify(cliques));
-  atualizarPainel();
+  const ref = db.collection("cliques").doc(farmacia);
+
+  ref.get().then(doc => {
+    if(doc.exists){
+      ref.update({
+        total: doc.data().total + 1
+      });
+    } else {
+      ref.set({
+        total: 1
+      });
+    }
+  });
 }
 
+// 🔥 ATUALIZAR PAINEL
 function atualizarPainel(){
   const div = document.getElementById("cliques");
-  div.innerHTML = "";
+  div.innerHTML = "Carregando...";
 
-  for(let f in cliques){
-    div.innerHTML += `${f}: ${cliques[f]} cliques<br>`;
-  }
+  db.collection("cliques").get().then(snapshot => {
+    div.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      div.innerHTML += `${doc.id}: ${doc.data().total} cliques<br>`;
+    });
+  });
 }
 
-function resetarCliques(){
-  const confirmar = confirm("Apagar todos os cliques?");
-  if(confirmar){
-    cliques = {};
-    localStorage.removeItem("cliquesFarmacia");
+// 🔥 ZERAR CLIQUES
+function zerarCliques(){
+  db.collection("cliques").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      doc.ref.delete();
+    });
     atualizarPainel();
-  }
+  });
 }
 
+// BUSCA
 function buscar(){
   const termo = document.getElementById("search").value.toLowerCase();
   const resultados = document.getElementById("resultados");
@@ -252,10 +280,10 @@ function buscar(){
   }
 
   filtrados.forEach((p, index) => {
+    const isMelhorPreco = !p.patrocinado && index === patrocinados.length;
+
     const card = document.createElement("div");
     card.className = "card";
-
-    const isMelhorPreco = !p.patrocinado && index === patrocinados.length;
 
     card.innerHTML = `
       <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
@@ -277,11 +305,13 @@ function buscar(){
   });
 }
 
+// ADMIN
 if (window.location.search.includes("admin")) {
   document.getElementById("painelAdmin").style.display = "block";
   atualizarPainel();
 }
 
+// EVENTOS
 document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
