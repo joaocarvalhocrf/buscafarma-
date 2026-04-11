@@ -215,21 +215,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// PRODUTOS
-const produtos = [
-  {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg", patrocinado:true},
-  {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
-  {nome:"Dipirona 500mg", preco:4.99, farmacia:"Farmácia Popular", img:"dipirona-500mg-com-10-comprimidos-4720aabb2f.jpg"},
-
-  {nome:"Dorflex", preco:12.99, farmacia:"Farmácia Central", img:"dorflex.jpg"},
-  {nome:"Dorflex", preco:11.50, farmacia:"Drogaria Saúde", img:"dorflex.jpg", patrocinado:true},
-  {nome:"Dorflex", preco:13.20, farmacia:"Farmácia Popular", img:"dorflex.jpg"},
-
-  {nome:"Paracetamol 750mg", preco:6.99, farmacia:"Farmácia Central", img:"paracetamol.jpeg"},
-  {nome:"Paracetamol 750mg", preco:5.90, farmacia:"Drogaria Saúde", img:"paracetamol.jpeg"},
-  {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpeg"}
-];
-
 // CLIQUES
 function registrarClique(farmacia){
   const ref = db.collection("cliques").doc(farmacia);
@@ -325,6 +310,27 @@ document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
 buscar();
+
+    let produtos = []; // Começa vazio
+
+// Esta função monitora o Firebase em tempo real
+function carregarProdutosDoBanco() {
+  db.collection("produtos").onSnapshot((snapshot) => {
+    produtos = []; // Limpa para atualizar
+    snapshot.forEach((doc) => {
+      produtos.push(doc.data());
+    });
+    
+    // Chama a função buscar() que você já tem para desenhar os cards na tela
+    buscar(); 
+    console.log("Produtos carregados do Firebase!");
+  });
+}
+
+// Inicia o carregamento assim que a página abre
+carregarProdutosDoBanco();
+    
+
  </script>
 
 </body>
