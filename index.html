@@ -329,9 +329,9 @@ function carregarProdutosDoBanco() {
   db.collection("produtos").onSnapshot((snapshot) => {
     produtos = []; // Limpa para atualizar
     snapshot.forEach((doc) => {
-      produtos.push(doc.data());
+      produtos.push(doc.data());  
     });
-    
+    alert("Recebi " + produtos.length + " produtos do banco!");
     // Chama a função buscar() que você já tem para desenhar os cards na tela
     buscar(); 
     console.log("Produtos carregados do Firebase!");
