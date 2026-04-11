@@ -205,33 +205,60 @@ header {
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-<script>
-// SERVICE WORKER (CORRETO)
+
+
+  <script>
+// SERVICE WORKER (CORRIGIDO PARA NETLIFY)
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/buscafarma/service-worker.js")
+  navigator.serviceWorker.register("service-worker.js")
     .then(() => console.log("Service Worker registrado"))
     .catch(err => console.log("Erro SW:", err));
 }
 
-// INSTALAR APP
+// INSTALAR APP INTELIGENTE
 let deferredPrompt;
 const btnInstall = document.getElementById("btnInstall");
 
+// captura evento real
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
   btnInstall.style.display = "block";
 });
 
-btnInstall.addEventListener("click", () => {
+// clique no botão
+btnInstall.addEventListener("click", async () => {
+
   if (deferredPrompt) {
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => {
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
       btnInstall.style.display = "none";
-      deferredPrompt = null;
-    });
+    }
+
+    deferredPrompt = null;
+
+  } else {
+    // fallback (quando não aparece automático)
+    alert("Para instalar o app:\n\n1. Clique nos 3 pontinhos do navegador\n2. Toque em 'Adicionar à tela inicial'\n\nFunciona igual um app 👍");
   }
+
 });
+
+// quando instala
+window.addEventListener("appinstalled", () => {
+  btnInstall.style.display = "none";
+});
+
+// fallback: força aparecer depois de 3s
+setTimeout(() => {
+  if (!deferredPrompt) {
+    btnInstall.style.display = "block";
+  }
+}, 3000);
+
 
 // FIREBASE
 const firebaseConfig = {
@@ -243,7 +270,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// PRODUTOS (ORIGINAL)
+// PRODUTOS
 const produtos = [
   {nome:"Dipirona 500mg", preco:5.99, farmacia:"Farmácia Central", img:"dipirona.jpg", patrocinado:true},
   {nome:"Dipirona 500mg", preco:6.49, farmacia:"Drogaria Saúde", img:"dipirona.jpg"},
@@ -258,7 +285,7 @@ const produtos = [
   {nome:"Paracetamol 750mg", preco:7.50, farmacia:"Farmácia Popular", img:"paracetamol.jpg"}
 ];
 
-// CLIQUES GLOBAL
+// CLIQUES
 function registrarClique(farmacia){
   const ref = db.collection("cliques").doc(farmacia);
 
@@ -344,7 +371,7 @@ document.getElementById("search").addEventListener("input", buscar);
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
 buscar();
-</script>
+ </script>
 
 </body>
   </html>
