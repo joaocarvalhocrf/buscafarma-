@@ -8,11 +8,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
         body { font-family: Arial; padding: 20px; background: #f0f2f5; }
-        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .item-lista { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
-        .btn-delete { background: #ff4757; width: auto; padding: 5px 10px; font-size: 12px; }
+        .btn-delete { background: #ff4757; width: auto; padding: 5px 10px; font-size: 11px; }
         img { width: 50px; height: 50px; object-fit: contain; }
     </style>
 </head>
@@ -24,20 +24,17 @@
     <input type="number" id="preco" placeholder="Preço (ex: 12.50)" step="0.01">
     <input type="text" id="farmacia" placeholder="Nome da Farmácia">
     <input type="text" id="imgUrl" placeholder="Link da Imagem (URL)">
-    
     <label><input type="checkbox" id="patrocinado"> ⭐ Patrocinado</label>
-    <button onclick="salvar()" style="margin-top: 15px;">Salvar no BuscaFarma</button>
-    <p id="status"></p>
+    <button onclick="salvar()" style="margin-top: 15px;">Salvar Produto</button>
 </div>
 
 <div class="box">
-    <h2>📦 Produtos no Ar</h2>
-    <div id="lista-produtos">Carregando produtos...</div>
+    <h2>📦 Produtos Online</h2>
+    <div id="lista-produtos">Carregando...</div>
 </div>
 
 <script>
-    // 1. COLE SUAS CONFIGURAÇÕES DO FIREBASE AQUI
-    const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDK31lrk1SaWE-muumhYJIJ2mBRvq_T8EA",
   authDomain: "buscafarma-a4c3c.firebaseapp.com",
   projectId: "buscafarma-a4c3c",
@@ -45,56 +42,49 @@
   messagingSenderId: "457560066459",
   appId: "1:457560066459:web:4389b9fe057c7362a5f93e"
 };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // FUNÇÃO PARA SALVAR
-    function salvar() {
-        const doc = {
-            nome: document.getElementById('nome').value,
-            preco: parseFloat(document.getElementById('preco').value),
-            farmacia: document.getElementById('farmacia').value,
-            img: document.getElementById('imgUrl').value || "https://via.placeholder.com/100",
-            patrocinado: document.getElementById('patrocinado').checked,
-            dataAlteracao: firebase.firestore.FieldValue.serverTimestamp()
-        };
+function salvar() {
+    const nome = document.getElementById('nome').value;
+    const preco = parseFloat(document.getElementById('preco').value);
+    const farmacia = document.getElementById('farmacia').value;
+    const img = document.getElementById('imgUrl').value || "https://via.placeholder.com/150";
+    const patrocinado = document.getElementById('patrocinado').checked;
 
-        if(!doc.nome || !doc.preco) return alert("Preencha nome e preço!");
+    if(!nome || isNaN(preco)) return alert("Preencha Nome e Preço corretamente!");
 
-        db.collection("produtos").add(doc).then(() => {
-            alert("Produto Adicionado!");
-            document.getElementById('nome').value = "";
-            document.getElementById('preco').value = "";
-        });
-    }
-
-    // FUNÇÃO PARA MOSTRAR E DELETAR PRODUTOS (TEMPO REAL)
-    db.collection("produtos").orderBy("dataAlteracao", "desc").onSnapshot((snapshot) => {
-        const container = document.getElementById("lista-produtos");
-        container.innerHTML = "";
-
-        snapshot.forEach((doc) => {
-            const p = doc.data();
-            container.innerHTML += `
-                <div class="item-lista">
-                    <img src="${p.img}">
-                    <div>
-                        <strong>${p.nome}</strong><br>
-                        <small>R$ ${p.preco.toFixed(2)} - ${p.farmacia}</small>
-                    </div>
-                    <button class="btn-delete" onclick="deletar('${doc.id}')">Excluir</button>
-                </div>
-            `;
-        });
+    db.collection("produtos").add({
+        nome, preco, farmacia, img, patrocinado,
+        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert("Cadastrado com sucesso!");
+        document.getElementById('nome').value = "";
+        document.getElementById('preco').value = "";
     });
+}
 
-    // FUNÇÃO PARA DELETAR
-    function deletar(id) {
-        if(confirm("Tem certeza que deseja excluir este produto?")) {
-            db.collection("produtos").doc(id).delete();
-        }
-    }
+db.collection("produtos").orderBy("dataCriacao", "desc").onSnapshot((snapshot) => {
+    const container = document.getElementById("lista-produtos");
+    container.innerHTML = "";
+    snapshot.forEach((doc) => {
+        const p = doc.data();
+        container.innerHTML += `
+            <div class="item-lista">
+                <img src="${p.img}">
+                <div>
+                    <strong>${p.nome}</strong><br>
+                    <small>R$ ${Number(p.preco).toFixed(2)} - ${p.farmacia}</small>
+                </div>
+                <button class="btn-delete" onclick="deletar('${doc.id}')">Excluir</button>
+            </div>
+        `;
+    });
+});
+
+function deletar(id) {
+    if(confirm("Deseja excluir?")) db.collection("produtos").doc(id).delete();
+}
 </script>
-
 </body>
 </html>
