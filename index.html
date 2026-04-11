@@ -237,10 +237,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
 
 // clique no botão
 btnInstall.addEventListener("click", async () => {
+  if (isAdmin) return; // 🚫 bloqueia admin
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
-
     const choice = await deferredPrompt.userChoice;
 
     if (choice.outcome === "accepted") {
@@ -248,8 +248,8 @@ btnInstall.addEventListener("click", async () => {
     }
 
     deferredPrompt = null;
-
-  } else {
+  }
+});
     // fallback (quando não aparece automático)
     alert("Para instalar o app:\n\n1. Clique nos 3 pontinhos do navegador\n2. Toque em 'Adicionar à tela inicial'\n\nFunciona igual um app 👍");
   }
