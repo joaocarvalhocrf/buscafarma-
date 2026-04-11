@@ -291,7 +291,7 @@ function buscar(){
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${p.img}" onerror="this.src='https://via.placeholder.com/100'">
+      <img src="${p.img || 'https://via.placeholder.com/150'}" alt="${p.nome}">
       <div class="info">
         <strong>${p.nome}</strong><br>
         ${p.patrocinado ? '<div class="patrocinado">⭐ Patrocinado</div>' : ''}
