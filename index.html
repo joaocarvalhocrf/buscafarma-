@@ -218,8 +218,9 @@ if ("serviceWorker" in navigator) {
 // INSTALAR APP INTELIGENTE
 let deferredPrompt;
 const btnInstall = document.getElementById("btnInstall");
-    const isAdmin = window.location.search.includes("admin");
+const isAdmin = window.location.search.includes("admin");
 
+// 🔥 FORÇA ESCONDER SE FOR ADMIN
 if (isAdmin) {
   btnInstall.style.display = "none";
 }
