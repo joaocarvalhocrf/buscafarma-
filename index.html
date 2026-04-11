@@ -55,6 +55,29 @@ const firebaseConfig = {
 
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
+  // FUNÇÃO PARA CONTABILIZAR CLIQUES
+function registrarClique(farmacia) {
+  if (!farmacia || farmacia === "undefined") {
+    console.log("Nome da farmácia não encontrado");
+    return;
+  }
+
+  // Caminho no banco: coleção 'cliques', documento com o nome da farmácia
+  const ref = db.collection("cliques").doc(farmacia);
+
+  ref.get().then((doc) => {
+    if (doc.exists) {
+      // Se já existe, soma +1
+      ref.update({ total: doc.data().total + 1 });
+    } else {
+      // Se é a primeira vez, cria com 1
+      ref.set({ total: 1 });
+    }
+    console.log("Clique registrado para: " + farmacia);
+  }).catch((error) => {
+    console.error("Erro ao registrar clique: ", error);
+  });
+}
 let produtos = []; // Declarado no topo para evitar erros
 
 // FUNÇÃO DE BUSCA
@@ -87,7 +110,11 @@ function buscar() {
         <div class="price">R$ ${Number(p.preco).toFixed(2)}</div>
         <small>${p.farmacia}</small>
       </div>
-      <a class="btn" target="_blank" href="https://wa.me/?text=Olá, quero ${p.nome}">Comprar</a>
+      <a class="btn" target="_blank" 
+         onclick="registrarClique('${p.farmacia}')" 
+         href="https://wa.me/5522981495667?text=Olá, quero ${p.nome}">
+         Comprar
+      </a>
     `;
     resultados.appendChild(card);
   });
