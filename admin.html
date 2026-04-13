@@ -46,6 +46,7 @@
 </div>
 
 <div class="box">
+    <input type="text" id="localizacao" placeholder="Link do Google Maps da Farmácia">
     <h2>📦 Produtos Online</h2>
     <div id="lista-produtos">Carregando...</div>
 </div>
@@ -65,15 +66,17 @@ const db = firebase.firestore();
 // FUNÇÃO PARA SALVAR OU ATUALIZAR
 function salvar() {
     const id = document.getElementById('produtoId').value;
+
     const doc = {
-        nome: document.getElementById('nome').value,
-        preco: parseFloat(document.getElementById('preco').value),
-        categoria: document.getElementById('categoria').value,
-        farmacia: document.getElementById('farmacia').value,
-        img: document.getElementById('imgUrl').value || "https://via.placeholder.com/150",
-        patrocinado: document.getElementById('patrocinado').checked,
-        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    nome: document.getElementById('nome').value,
+    preco: parseFloat(document.getElementById('preco').value),
+    categoria: document.getElementById('categoria').value,
+    farmacia: document.getElementById('farmacia').value,
+    img: document.getElementById('imgUrl').value || "https://via.placeholder.com/150",
+    patrocinado: document.getElementById('patrocinado').checked,
+    localizacao: document.getElementById('localizacao').value, // Nova linha aqui
+    dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+};
 
     if(!doc.nome || isNaN(doc.preco)) return alert("Preencha Nome e Preço!");
 
